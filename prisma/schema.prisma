@@ -1,0 +1,62 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model Account {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String?
+  email         String    @unique
+  emailVerified DateTime?
+  type          String
+  provider      String
+  refresh_token String?
+  access_token  String?
+  expires_at    Int?
+  token_type    String?
+  scope         String?
+  id_token      String?
+  session_state String?
+  sessions      Session[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  account      Account  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Contact {
+  accountId      String        
+  id             String        @id @default(cuid())
+  firstName      String
+  lastName       String?
+  email          String?
+  company        String?
+  phone          String?
+  lastContacted  DateTime?
+  active         Boolean
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  contactGroupId String?
+  contactGroup   ContactGroup? @relation(fields: [contactGroupId], references: [id])
+  isFavorite     Boolean       @default(false)
+}
+
+model ContactGroup {
+  accountId        String 
+  id               String    @id @default(cuid())
+  groupName        String
+  contactFrequency BigInt
+  contacts         Contact[]
+  color            String?
+}
